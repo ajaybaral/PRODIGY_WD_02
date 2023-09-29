@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stopwatch</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-black">
+<div class="container justify-center items-center flex m-auto p-24">
+    <div class="w-72 h-72 bg-white rounded-full flex justify-center items-center outer-circle">
+        <div class="w-64 h-64 bg-black rounded-full justify-center items-center flex inner-circle">
+            <div>
+                <span class="text-white text-3xl min">00:</span>
+                <span class="text-white text-3xl sec">00:</span>
+                <span class="text-white text-3xl msec">00</span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="text-black flex items-center justify-around button-wrapper">
+    <button class="bg-black text-white border border-red-400 p-3 rounded-xl reset">RESET</button>
+    <button class="bg-black text-white border border-red-400 p-3 rounded-xl play">PLAY</button>
+    <button class="bg-black text-white border border-red-400 p-3 rounded-xl stop">STOP</button>
+    <button class="bg-black text-white border border-red-400 p-3 rounded-xl lap">LAP</button>
+</div>
+<div class="bg-black text-white m-auto w-12 rounded-lg my-10 text-center p-2 laps">Laps</div>
+<div class="text-white">
+    <ul class="overflow-y-scroll scrollbar-hide h-96 relative">
+    </ul>
+    <button class="text-white clear block absolute -my-40 border-2 p-2 rounded-m3 left-36 right-36">CLEAR ALL</button>
+</div>
+
+<script>
+    let isRunning = false;
+    let startTime = 0;
+    let lapStartTime = 0;
+    let lapNumber = 1;
+    let interval;
+
+    const minutesElement = document.querySelector(".min");
+    const secondsElement = document.querySelector(".sec");
+    const millisecondsElement = document.querySelector(".msec");
+
+    const resetButton = document.querySelector(".reset");
+    const playButton = document.querySelector(".play");
+    const stopButton = document.querySelector(".stop");
+    const lapButton = document.querySelector(".lap");
+    const lapsList = document.querySelector(".laps");
+    const clearAllButton = document.querySelector(".clear");
+
+    function updateDisplay() {
+        const currentTime = Date.now() - startTime;
+        const minutes = Math.floor(currentTime / 60000);
+        const seconds = Math.floor((currentTime % 60000) / 1000);
+        const milliseconds = Math.floor((currentTime % 1000) / 10);
+
+        minutesElement.textContent = minutes.toString().padStart(2, "0") + ":";
+        secondsElement.textContent = seconds.toString().padStart(2, "0") + ":";
+        millisecondsElement.textContent = milliseconds.toString().padStart(2, "0");
+    }
+
+    function startTimer() {
+        if (!isRunning) {
+            const now = Date.now();
+            startTime = now - (startTime ? now - startTime : 0);
+            lapStartTime = now - (lapStartTime ? now - lapStartTime : 0);
+            interval = setInterval(updateDisplay, 10);
+            isRunning = true;
+        }
+    }
+
+    function stopTimer() {
+        clearInterval(interval);
+        isRunning = false;
+    }
+
+    function resetTimer() {
+        stopTimer();
+        startTime = 0;
+        lapStartTime = 0;
+        minutesElement.textContent = "00:";
+        secondsElement.textContent = "00:";
+        millisecondsElement.textContent = "00";
+        lapNumber = 1;
+        lapsList.innerHTML = '';
+    }
+
+
+function recordLapTime() {
+    if (isRunning) {
+        const lapTimeItem = document.createElement("li");
+        lapTimeItem.className = "text-center text-2xl my-2 laps-item";
+        const currentTime = Date.now() - lapStartTime;
+        const minutes = Math.floor(currentTime / 60000);
+        const seconds = Math.floor((currentTime % 60000) / 1000);
+        const milliseconds = Math.floor((currentTime % 1000) / 10);
+
+        lapTimeItem.innerHTML = `<span class="text-white">Lap #${lapNumber}: ${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}:${milliseconds.toString().padStart(2, "0")}</span>`;
+        lapNumber++;
+        lapsList.appendChild(lapTimeItem);
+        lapStartTime = Date.now();
+    }
+}
+
+
+
+
+    function clearAllLaps() {
+        lapsList.innerHTML = '';
+    }
+
+    playButton.addEventListener("click", startTimer);
+    stopButton.addEventListener("click", stopTimer);
+    resetButton.addEventListener("click", resetTimer);
+    lapButton.addEventListener("click", recordLapTime);
+    clearAllButton.addEventListener("click", clearAllLaps);
+</script>
+
+</body>
+</html>
